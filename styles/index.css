@@ -1,0 +1,332 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+
+/*moncode*/
+/*DIFFERENTE PARTIE*/
+body{
+	font-size: 14px;
+	line-height: 1.6em;
+	font-family: Verdana , Geneva , sans-serif;
+	background: #20190F;
+	color: #E8DBB1;
+}
+#blocpage{
+	background-image: url("../images/fond.jpg");
+	width:800px;
+	margin:0 auto;
+}
+
+header{
+	height: 270px;
+	background-image: url("../images/entete_deconnecte.jpg");
+	background-repeat: no-repeat;
+	position: relative;
+}
+
+aside{
+	position: relative;
+	float: left;
+	width: 250px;
+	height: 450px;
+	background-image: url("../images/micro.jpg");
+	background-repeat: no-repeat;
+	font-family: Comic Sans MS, cursive, Sans-Serif;
+	font-size: 16px;
+}
+#divconnection{
+	float: right;
+	height: auto;
+	width: 550px;
+}
+#compte{
+	background-image: url("../images/entete.jpg");
+	background-repeat: no-repeat;
+}
+footer{
+	position: relative;
+	clear: both;
+	height: 65px;
+	background-image: url(../images/pied.png);
+	background-repeat: no-repeat;
+	padding-bottom: 50px;
+
+}
+/*HEADDER*/
+#lignehead{
+	position: absolute;
+	right: 0px;
+	top: 200px;
+}
+#texteSoustitre{
+	position: absolute;
+	right: 135px;
+	top: 220px;
+}
+/*ICONE TOP*/
+/*ICONEDECO*/
+#onoff{
+	width: 68px;
+	height: 73px;
+	background-image: url("../images/deconnexion.png");
+	position: absolute;
+	right: 0px;
+	top: 15px;
+}
+#onoff:hover{
+	background-image: url("../images/deconnexion_over.png");
+}
+/*ICONEHOME*/
+#home{
+	width: 48px;
+	height: 44px;
+	background-image: url(../images/home.png);
+	position: absolute;
+	right: 215px;
+	top: 80px;
+
+}
+#home:hover{
+	background-image: url(../images/home_over.png);
+}
+
+#lignehead{
+	position: absolute;
+	right: 0px;
+	top: 200px;
+}
+
+/*ICONERECHERCHE*/
+#cherche{
+	width: 44px;
+	height: 40px;
+	background-image: url(../images/cherche.png);
+	position: absolute;
+	top: 85px;
+	right: 155px;	
+}
+#cherche:hover{
+	background-image: url(../images/cherche_over.png);
+}
+
+/*ICONECONFIG*/
+#config{
+	width: 44px;
+	height: 40px;
+	background-image: url(../images/config.png);
+	position: absolute;
+	top: 85px;
+	right: 100px;
+}
+#config:hover{
+	background-image: url(../images/config_over.png);
+}
+/*ASIDE*/
+/*TEXTE*/
+a{
+	color: #3C96F1;
+	text-decoration: none;
+	z-index: 4;
+}
+a:hover{
+	text-decoration: underline;
+}
+.minititre{
+	padding-left: 10px;
+	margin-top: 16px;
+	color: #efe7de;
+	font-weight: bold;
+}
+#textefpiat{
+	position: absolute;
+	top: 50px;
+	left: 0px;
+}
+aside img{
+	padding-left: 10px;
+}
+aside label{
+	float: right;
+	margin-top: 25px;
+	margin-right: 90px;
+}
+#infoutilisateur{
+	clear: both;
+	margin-top:70px;
+	padding-left: 10px;
+}
+#hashtag{
+	padding-left: 10px;
+	line-height: 1.2em;
+}
+#suggestions li{
+	margin-top: 10px;
+	float:left;
+}
+li label{
+	margin:inherit;
+	margin-left: 10px;
+}
+
+/*INDEX.PHP*/
+/*div connection*/
+h1{
+	color: #be7e11;
+	font-size:28px;
+	font-weight: bold;
+	position: absolute;
+	right: 15px;
+	top: 175px;
+}
+h2{
+	color: #be7e11;
+	font-weight: bold;
+}
+#saisiePseudo{
+	text-align: center;
+	margin-top: 30px;
+	margin-bottom: 10px;
+	margin-right: 72px;
+}
+#saisieMdp{
+	text-align: center;
+	margin-bottom: 10px;
+	margin-right: 156px;
+}
+#texteBaspage{
+	margin-top: 60px;
+}
+
+/*INSCRIPTION.PHP*/
+input{
+	border: none;
+	text-align:left;
+	color:#7a370d;
+}
+textarea{
+	color:#7a370d;
+	resize:none;
+}
+select{
+	border: none;
+	margin-right: 5px;
+	color:#7a370d;
+}
+table{
+	position: relative;
+	width: 100%;
+}
+td{
+	padding-top: 10px;
+}
+.textform{
+	text-align: right;
+	margin-right: 10px;
+	color: white;
+}
+#bio{
+	position:relative;
+	bottom: 140px;
+}
+#texteinscription{
+	margin-top: 10px;
+	margin-bottom: 40px;
+	margin-right: -100px;
+	color: white;
+}
+input[type=submit]{
+	text-align: center;
+	color:#7a370d;
+	border: none;
+	background-color:transparent;
+	background-image: url("../images/bouton.png");
+	height: 42px;
+	width: 142px;
+	margin-bottom: 30px;
+	float: right;
+	margin-right:20px; 
+}
+input[type=submit]:hover{
+	background-image: url("../images/bouton_over.png");
+}
+/*FOOTER*/
+.lien{
+	margin-right: 20px;
+	position: relative;
+	left: 130px;
+	top: 5px;
+	font-size: 12px;
+	opacity: 0.6;
+}
+.lien:hover{
+	opacity: 1;
+}
+/*compte.php*/
+input[type=file]{
+	color: white;
+}
+#photo{
+	position: relative;
+	bottom: 35px;
+}
+#soustitre{
+	position: relative;
+	right: 10px;
+	bottom: 50px;
+	margin-bottom: -25px;
+}
+#filename{
+	color: black;
+}
+h3{
+	font-weight: bold;
+	border-bottom:solid;
+	margin-bottom: 10px;
+}
