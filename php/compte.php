@@ -20,8 +20,10 @@ error_reporting(E_ALL); // toutes les erreurs sont capturées (utile lors de la 
 // si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
 //wa_est_authentifie();
 
-// traitement si soumission du formulaire de connexion
-$err = isset($_POST['btnConnexion']) ? wal_traitement_connexion() : array();
+// traitement si soumission des formulaires
+$err = isset($_POST['btnValider1']) ? wal_traitement_info_perso() : array();
+/*$err = isset($_POST['btnValider2']) ? wal_traitement_connexion() : array();
+$err = isset($_POST['btnValider3']) ? wal_traitement_connexion() : array();*/
 
 /*------------------------- Etape 2 --------------------------------------------
 - génération du code HTML de la page
@@ -52,19 +54,26 @@ ob_end_flush();
 function wal_aff_formulaire(array $err): void {
 
     // réaffichage des données soumises en cas d'erreur, sauf les mots de passe 
-    if (isset($_POST['btnValider'])){
-        $values = wa_html_proteger_sortie($_POST);
+    if (isset($_POST['btnValider1'])){
+      $values = wa_html_proteger_sortie($_POST);
     }
     else{
-        $values['nomprenom'] = $values['naissance'] = $values['ville'] = $values['bio'] = $values['email'] = $values['web'] = '';
+      $values['nomprenom'] = $values['naissance'] = $values['ville'] = $values['bio'] = '';
     }
-        
+
+    if (isset($_POST['btnValider2'])){
+      $values = wa_html_proteger_sortie($_POST);
+    }
+    else{
+      $values['email'] = $values['web'] = '';
+    }
+
     if (count($err) > 0) {
-        echo '<p class="error">Les erreurs suivantes ont été détectées : ';
-        foreach ($err as $v) {
-            echo '<br> - ', $v;
-        }
-        echo '</p>';    
+      echo '<p class="error">Les erreurs suivantes ont été détectées : ';
+      foreach ($err as $v) {
+          echo '<br> - ', $v;
+      }
+      echo '</p>';    
     }
 
 
@@ -78,8 +87,7 @@ function wal_aff_formulaire(array $err): void {
 
     wa_aff_ligne_input('Nom', array('type' => 'text', 'name' => 'nomprenom', 'value' => $values['nomprenom'], 'required' => null));
     wa_aff_ligne_input('Date de naissance', array('type' => 'date', 'name' => 'naissance', 'value' => $values['naissance'], 'required' => null));
-    wa_aff_ligne_input('Ville', array('type' => 'text', 'name' => 'ville', 'value' => $values['ville'], 'required' => null));
-    wa_aff_ligne_input('Mini-bio', array('type' => 'text', 'name' => 'bio', 'value' => $values['bio'], 'required' => null));
+    wa_aff_ligne_input('Ville', array('type' => 'text', 'name' => 'ville', 'value' => $values['ville']));
     echo '<tr><td><p id="bio">Mini-bio</p></td><td><textarea name="bio" cols="40" rows="13">', $values['bio'] ,'</textarea></td></tr>';
 
     echo 
@@ -96,7 +104,7 @@ function wal_aff_formulaire(array $err): void {
                 '<table>';
 
     wa_aff_ligne_input('Adresse mail:', array('type' => 'email', 'name' => 'email', 'value' => $values['email'], 'required' => null));
-    wa_aff_ligne_input('Site web', array('type' => 'text', 'name' => 'web', 'value' => $values['web'], 'required' => null));
+    wa_aff_ligne_input('Site web', array('type' => 'text', 'name' => 'web', 'value' => $values['web']));
 
     echo 
                     '<tr>',
@@ -111,8 +119,8 @@ function wal_aff_formulaire(array $err): void {
             '<form method="post" action="compte.php">',
                 '<table>';
 
-    wa_aff_ligne_input('Votre mot de passe :', array('type' => 'password', 'name' => 'passe1', 'value' => '', 'required' => null));
-    wa_aff_ligne_input('Répétez le mot de passe :', array('type' => 'password', 'name' => 'passe2', 'value' => '', 'required' => null));
+    wa_aff_ligne_input('Votre mot de passe :', array('type' => 'password', 'name' => 'passe1', 'value' => ''));
+    wa_aff_ligne_input('Répétez le mot de passe :', array('type' => 'password', 'name' => 'passe2', 'value' => ''));
     $photo="../upload/1.jpg";
     $usAvecPhoto=0;
     echo
@@ -145,6 +153,112 @@ function wal_aff_formulaire(array $err): void {
                 '</table>',
             '</form>',
             '</div>';
+}
+
+function wal_traitement_info_perso(): array {
+  
+  if( !wa_parametres_controle('post', array('nomprenom', 'naissance', 'ville', 'bio', 'btnValider1'))) {
+    wa_session_exit();   
+  }
+    
+  foreach($_POST as &$val){
+    $val = trim($val);
+  }
+    
+  $erreurs = array();
+
+  // vérification des noms et prenoms
+  if (empty($_POST['nomprenom'])) {
+    $erreurs[] = 'Le nom et le prénom doivent être renseignés.'; 
+  }
+  else {
+    if (mb_strlen($_POST['nomprenom'], 'UTF-8') > LMAX_NOMPRENOM){
+        $erreurs[] = 'Le nom et le prénom ne peuvent pas dépasser ' . LMAX_NOMPRENOM . ' caractères.';
+    }
+    $noTags = strip_tags($_POST['nomprenom']);
+    if ($noTags != $_POST['nomprenom']){
+        $erreurs[] = 'Le nom et le prénom ne peuvent pas contenir de code HTML.';
+    }
+    else {
+        if( !mb_ereg_match('^[[:alpha:]]([\' -]?[[:alpha:]]+)*$', $_POST['nomprenom'])){
+            $erreurs[] = 'Le nom et le prénom contiennent des caractères non autorisés.';
+        }
+    }
+  }
+
+  // vérification de la date de naissance
+  if (empty($_POST['naissance'])){
+    $erreurs[] = 'La date de naissance doit être renseignée.'; 
+  }
+  else{
+    if( !mb_ereg_match('^\d{4}(-\d{2}){2}$', $_POST['naissance'])){ //vieux navigateur qui ne supporte pas le type date ?
+      $erreurs[] = 'la date de naissance doit être au format "AAAA-MM-JJ".'; 
+    }
+    else{
+      list($annee, $mois, $jour) = explode('-', $_POST['naissance']);
+      if (!checkdate($mois, $jour, $annee)) {
+        $erreurs[] = 'La date de naissance n\'est pas valide.'; 
+      }
+      else if (mktime(0,0,0,$mois,$jour,$annee + AGE_MIN) > time()) {
+        $erreurs[] = 'Vous devez avoir au moins '.AGE_MIN.' ans pour vous inscrire.'; 
+      }
+      else if (mktime(0,0,0,$mois,$jour,$annee + AGE_MAX + 1) < time()) {
+        $erreurs[] = 'Vous devez avoir au plus '.AGE_MAX.' ans pour vous inscrire.'; 
+      }
+    }
+  }
+
+  // vérification de la ville
+  if (mb_strlen($_POST['ville'], 'UTF-8') > LMAX_VILLE){
+    $erreurs[] = 'La ville ne peut pas dépasser ' . LMAX_VILLE . ' caractères.';
+  }
+  $noTags = strip_tags($_POST['ville']);
+  if ($noTags != $_POST['ville']){
+    $erreurs[] = 'La ville ne peut pas contenir de code HTML.';
+  }
+
+  // vérification de la mini-bio
+  if (mb_strlen($_POST['bio'], 'UTF-8') > LMAX_BIO){
+    $erreurs[] = 'La mini-bio ne peut pas dépasser ' . LMAX_BIO . ' caractères.';
+  }
+  $noTags = strip_tags($_POST['bio']);
+  if ($noTags != $_POST['bio']){
+    $erreurs[] = 'La mini-bio ne peut pas contenir de code HTML.';
+  }
+
+  // s'il n'y a pas d'erreurs ==> on retourne un message de réussite
+  if (count($erreurs) == 0) {
+    $bd = wa_bd_connect();
+    echo '<p class="update">Mises à jour ok.</p>';    
+  }
+
+  // s'il y a des erreurs ==> on retourne le tableau d'erreurs    
+  if (count($erreurs) > 0) {  
+    return $erreurs;
+  }
+
+  // pas d'erreurs ==> enregistrement de l'utilisateur
+  $nomprenom = wa_bd_proteger_entree($bd, $_POST['nomprenom']);
+  $ville = wa_bd_proteger_entree($bd, $_POST['ville']);
+  $bio = wa_bd_proteger_entree($bd, $_POST['bio']);
+  
+  $aaaammjj = $annee*10000  + $mois*100 + $jour;
+  
+  $sql = "INSERT INTO users(usNom, usVille, usBio, usDateNaissance) 
+          VALUES ('$nomprenom', '$ville', '$bio', $aaaammjj)";
+          
+  $res = wa_bd_send_request($bd, $sql);
+  
+  // mémorisation de l'ID dans une variable de session 
+  // cette variable de session permet de savoir si le client est authentifié
+  $_SESSION['usID'] = mysqli_insert_id($bd);
+  
+  // libération des ressources
+  mysqli_free_result($res);
+  mysqli_close($bd);
+
+  header('Location: protegee.php'); //TODO : à modifier dans le projet
+  exit();
 }
 
 /*

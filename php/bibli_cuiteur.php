@@ -19,10 +19,15 @@ mb_regex_encoding ('UTF-8');
 define('IS_DEV', true);//true en phase de développement, false en phase de production
 
  // Paramètres pour accéder à la base de données
-define('BD_SERVER', 'localhost');
+/*define('BD_SERVER', 'localhost');
 define('BD_NAME', 'cuiteur_bd');
 define('BD_USER', 'root');
-define('BD_PASS', '');
+define('BD_PASS', '');*/
+
+define('BD_SERVER', 'localhost');
+define('BD_NAME', 'akel_cuiteur');
+define('BD_USER', 'akel_u');
+define('BD_PASS', 'akel_p');
 
 
 // paramètres de l'application
@@ -30,6 +35,8 @@ define('LMIN_PSEUDO', 4);
 define('LMAX_PSEUDO', 30); //longueur du champ dans la base de données
 define('LMAX_EMAIL', 80); //longueur du champ dans la base de données
 define('LMAX_NOMPRENOM', 60); //longueur du champ dans la base de données
+define('LMAX_VILLE', 50); //longueur du champ dans la base de données
+define('LMAX_BIO', 255); //longueur du champ dans la base de données
 
 
 define('LMIN_PASSWORD', 4);
