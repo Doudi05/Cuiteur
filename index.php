@@ -19,7 +19,7 @@ error_reporting(E_ALL); // toutes les erreurs sont capturées (utile lors de la 
 
 // si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
 if (wa_est_authentifie()){
-    $chemin = isset($_POST['redirection'])? $_POST['redirection'] : 'php/wesh.php';
+    $chemin = isset($_POST['redirection'])? $_POST['redirection'] : 'php/deconnexion.php';
     header('Location: '.$chemin);
     exit();
 }

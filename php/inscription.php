@@ -16,8 +16,10 @@ require_once 'bibli_cuiteur.php';
 ------------------------------------------------------------------------------*/
 
 // si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
+// si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
 if (wa_est_authentifie()){
-    header('Location: cuiteur_1.php');
+    $chemin = isset($_POST['redirection'])? $_POST['redirection'] : 'cuiteur.php';
+    header('Location: '.$chemin);
     exit();
 }
 

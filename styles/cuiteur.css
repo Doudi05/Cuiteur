@@ -168,6 +168,12 @@ header {
     position: relative;
 }
 
+#deconn{
+    background: url(../images/entete_deconnecte.jpg) no-repeat;
+    height: 270px;
+    position: relative;
+}
+
 
 /* Tous les éléments descendants de l'élément header sont positionnés en absolu.
  * Comme l'élément header est en positionnement relatif, cet élément header est le bloc conteneur 
@@ -377,17 +383,21 @@ strong {
     font-weight: bold;
 }
 
-#divconnection {
+#divCompte {
     float: right;
     height: auto;
     width: 550px;
 }
 
-#divconnection h3 {
+#divCompte h3 {
     font-weight: bold;
     border-bottom: 3px solid;
 }
 
+#resultRech {
+    font-weight: bold;
+    border-bottom: 3px solid;
+}
 
 /* ---------------------------------------------------------------
     FORMULAIRE

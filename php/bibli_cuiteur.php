@@ -19,15 +19,15 @@ mb_regex_encoding ('UTF-8');
 define('IS_DEV', true);//true en phase de développement, false en phase de production
 
  // Paramètres pour accéder à la base de données
-/*define('BD_SERVER', 'localhost');
+define('BD_SERVER', 'localhost');
 define('BD_NAME', 'cuiteur_bd');
 define('BD_USER', 'root');
-define('BD_PASS', '');*/
+define('BD_PASS', '');
 
-define('BD_SERVER', 'localhost');
+/*define('BD_SERVER', 'localhost');
 define('BD_NAME', 'akel_cuiteur');
 define('BD_USER', 'akel_u');
-define('BD_PASS', 'akel_p');
+define('BD_PASS', 'akel_p');*/
 
 
 // paramètres de l'application
@@ -45,6 +45,10 @@ define('LMAX_PASSWORD', 20);
 define('AGE_MIN', 18);
 define('AGE_MAX', 120);
 
+//Nombre de tags et blablas souhait�s a l'�cran
+define('MAX_TAG',4);
+define('MAX_BLA',4);
+
 
 //_______________________________________________________________
 /**
@@ -53,20 +57,40 @@ define('AGE_MAX', 120);
  * @param ?string    $titre  Titre de l'entete (si null, affichage de l'entete de cuiteur.php avec le formulaire)
  */
 function wa_aff_entete(?string $titre = null):void{
-    echo '<div id="bcContenu">',
-            '<header>',
-                '<a href="deconnexion.php" title="Se déconnecter de cuiteur"></a>',
-                '<a href="../index.html" title="Ma page d\'accueil"></a>',
-                '<a href="../index.html" title="Rechercher des personnes à suivre"></a>',
-                '<a href="../index.html" title="Modifier mes informations personnelles"></a>';
     if ($titre === null){
-        echo    '<form action="../index.html" method="POST">',
-                    '<textarea name="txtMessage"></textarea>',
-                    '<input type="submit" name="btnPublier" value="" title="Publier mon message">',
-                '</form>';
+        echo    
+            '<div id="bcContenu">',
+                '<header>',
+                    '<a href="deconnexion.php" title="Se déconnecter de cuiteur"></a>',
+                    '<a href="cuiteur.php" title="Ma page d\'accueil"></a>',
+                    '<a href="recherche.php" title="Rechercher des personnes à suivre"></a>',
+                    '<a href="compte.php" title="Modifier mes informations personnelles"></a>',
+                    '<form action="cuiteur.php" method="POST">',
+                        '<textarea name="txtMessage"></textarea>',
+                        '<input type="submit" name="btnPublier" value="" title="Publier mon message">',
+                    '</form>';
     }
-    else{
-        echo    '<h1>', $titre, '</h1>';
+    elseif($titre === "Connectez-vous"){
+        echo    
+            '<div id="bcContenu">',
+                '<header id="deconn">',
+                    '<h1>Connectez-vous</h1>';
+    }
+    elseif($titre === "Inscription"){
+        echo
+            '<div id="bcContenu">',
+                '<header id="deconn">',
+                    '<h1>Inscription</h1>';
+    }
+    else {
+        echo    
+            '<div id="bcContenu">',
+                '<header>',
+                    '<a href="deconnexion.php" title="Se déconnecter de cuiteur"></a>',
+                    '<a href="cuiteur.php" title="Ma page d\'accueil"></a>',
+                    '<a href="recherche.php" title="Rechercher des personnes à suivre"></a>',
+                    '<a href="compte.php" title="Modifier mes informations personnelles"></a>',
+                    '<h1>'.$titre.'</h1>';
     }
     echo    '</header>';    
 }
@@ -159,20 +183,26 @@ function wa_aff_blablas(mysqli_result $r): void {
             $photo = $t['oriPhoto'];
             $nom_orig = $t['oriNom'];
         }
-        echo    '<li>', 
-                    '<img src="../', ($photo == 1 ? "upload/$id_orig.jpg" : 'images/anonyme.jpg'), 
-                    '" class="imgAuteur" alt="photo de l\'auteur">',
-                    wa_html_a('utilisateur.php', '<strong>'.wa_html_proteger_sortie($pseudo_orig).'</strong>','id', $id_orig, 'Voir mes infos'), 
-                    ' ', wa_html_proteger_sortie($nom_orig),
-                    ($t['oriID'] !== null ? ', recuité par '
-                                            .wa_html_a( 'utilisateur.php','<strong>'.wa_html_proteger_sortie($t['autPseudo']).'</strong>',
-                                                        'id', $t['autID'], 'Voir mes infos') : ''),
-                    '<br>',
-                    wa_html_proteger_sortie($t['blTexte']),
-                    '<p class="finMessage">',
-                    wa_amj_clair($t['blDate']), ' à ', wa_heure_clair($t['blHeure']),
-                    '<a href="../index.html">Répondre</a> <a href="../index.html">Recuiter</a></p>',
-                '</li>';
+        echo    
+            '<li>', 
+                '<img src="../', ($photo == 1 ? "upload/$id_orig.jpg" : 'images/anonyme.jpg'), 
+                '" class="imgAuteur" alt="photo de l\'auteur">',
+                wa_html_a('utilisateur.php', '<strong>'.wa_html_proteger_sortie($pseudo_orig).'</strong>','id', $id_orig, 'Voir mes infos'), 
+                ' ', wa_html_proteger_sortie($nom_orig),
+                ($t['oriID'] !== null ? ', recuité par '
+                                        .wa_html_a( 'utilisateur.php','<strong>'.wa_html_proteger_sortie($t['autPseudo']).'</strong>',
+                                                    'id', $t['autID'], 'Voir mes infos') : ''),
+                '<br>',
+                wa_html_proteger_sortie($t['blTexte']),
+                '<p class="finMessage">',
+                wa_amj_clair($t['blDate']), ' à ', wa_heure_clair($t['blHeure']);
+                if ($t['autID']!=$_SESSION['id']){
+                    echo '<a href="cuiteur.php?txtBlabla=@'.$t['oriPseudo'].'&blID='.$t['blID'].'">Répondre</a> <a href="cuiteur.php?recuiter='.$t['blID'].'">Recuiter</a><p>';
+                }
+                else{
+                    echo '<a href="cuiteur.php?delete='.$t['blID'].'">Supprimer</a><p>';
+                }
+            '</li>';
     }
 }
 
@@ -238,6 +268,124 @@ function wa_session_exit(string $page = '../index.php'):void {
 ****************************************************************************
 */
 
+/**
+ * Fonction qui affiche les checkbox pour la list des utilisateur (s'abonner / se desabonner)
+ *
+ * @param mysqli     $bd    base de donnée
+ * @param int    $id    id de l'utilisateur concerné
+**/
+function MLM_GK_checkbox($bd,$id){
+	$sql="SELECT count(eaIDUser) FROM estabonne WHERE eaIDUser= {$_SESSION['id']} AND eaIDAbonne=$id";
+	$checkbox=wa_bd_send_request($bd, $sql);
+	$check=mysqli_fetch_assoc($checkbox);
+	if ($check['count(eaIDUser)']==0) {
+		echo
+		'<p class=abodesabo>',
+		'<input type=checkbox id=',$id,' name=',$id,' value=0 /><label for=',$id,'>S\'abonner</label>',
+		'</p>';
+	}else{
+		echo
+		'<p class=abodesabo>',
+		'<input type=checkbox id=',$id,' name=',$id,' value=1 /><label for=',$id,'>Se desabonner</label>',
+		'</p>';
+	}
+}
 
+/**
+ * Fonction qui affiche la liste des utilisateur que l'on souhaite
+ *
+ * @param mysqli     $bd    base de donnée
+ * @param retour sql    $res    resultat de la requete sql
+**/
+function MLM_GK_aff_recherche($bd,$res,$php='',$nb=''){
+	echo
+	'<form action=# method=post>',
+		'<ul>';
+		$count=0;
+		$arrayID=array();
+		while ($RECH=mysqli_fetch_assoc($res)) {
+			$pseudo=$RECH['usPseudo'];
+			$nom=$RECH['usNom'];
+			$id=$RECH['usID'];
+			$photo=wa_html_proteger_sortie(profilePicture($RECH['usID'],$RECH['usAvecPhoto']));
+			$lienprofil='utilisateur.php?id='.cryptage(wa_html_proteger_sortie($RECH['usID']));
+			$lienblabla='blablas.php?id='.cryptage(wa_html_proteger_sortie($RECH['usID']));
+			$lienabonnement='abonnement.php?id='.cryptage(wa_html_proteger_sortie($RECH['usID']));
+			$lienabooné='abonnes.php?id='.cryptage(wa_html_proteger_sortie($RECH['usID']));
+			$lienmentions='mentions.php?id='.cryptage(wa_html_proteger_sortie($RECH['usID']));
+			//requete pour avoir nb blablas & nb mentions & nb abonnés & nb abonnement
+			$bl= "SELECT * , COUNT(blID)
+			FROM users , blablas
+			WHERE users.usID = blablas.blIDAuteur
+			AND usID='$id'";
+			$nbbl=wa_bd_send_request($bd, $bl);
+			$T=mysqli_fetch_assoc($nbbl);
+			/*REQUETE POUR AVOIR LE NOMBRE D'ABONNEMENT*/
+			$nbabonnement= "SELECT COUNT(eaIDAbonne)
+					FROM estabonne
+					WHERE eaIDUser='$id'";
+			$abo=wa_bd_send_request($bd, $nbabonnement);
+			$A=mysqli_fetch_assoc($abo);
+			//--------------------------------------------------------------------//
+			/*REQUETE POUR AVOIR LE NOMBRE D'ABONNEE*/
+			$nbabonne= "SELECT COUNT(estabonne.eaIDUser)
+			FROM estabonne
+			WHERE estabonne.eaIDAbonne ='$id'";
+			$nbabo=wa_bd_send_request($bd, $nbabonne);
+			$Abo=mysqli_fetch_assoc($nbabo);
+			/*REQUETE POUR AVOIR LE NOMBRE DE MENTIONS*/
+			$mentions= "SELECT COUNT(meIDBlabla)
+			FROM mentions
+			WHERE meIDUser ='$id'";
+			$nbmentions=wa_bd_send_request($bd, $mentions);
+			$M=mysqli_fetch_assoc($nbmentions);
+			$nbblablas=wa_html_proteger_sortie($T['COUNT(blID)']);
+			$nbment=wa_html_proteger_sortie($M['COUNT(meIDBlabla)']);
+			$nbabo=wa_html_proteger_sortie($Abo['COUNT(estabonne.eaIDUser)']);
+			$nbabonnement=wa_html_proteger_sortie($A['COUNT(eaIDAbonne)']);
+
+			if($php!='suggestions.php'){
+			echo
+			'<li class="resultatRecherche">',
+				'<img class="imgAuteur" alt="',$nom,'" src="',$photo,'"/>',
+                '<p><a href="',$lienprofil,'">',$pseudo,'</a> ',$nom,'</p>',
+                '<ul>',
+	            	'<li><a href="',$lienblabla,'">',$nbblablas,' blablas</a> - </li>',
+					'<li><a href="',$lienmentions,'">',$nbment,' mentions</a> - </li>',
+					'<li><a href="',$lienabooné,'">',$nbabo,' abonnés</a> - </li>',
+					'<li><a href="',$lienabonnement,'">',$nbabonnement,' abonnement</a></li>',
+				'</ul>';
+				if($_SESSION['id']!=$RECH['usID']){
+					MLM_GK_checkbox($bd,$RECH['usID'],$nom);
+				}
+			}else{
+				$sql="SELECT count(eaDate) FROM estabonne WHERE eaIDAbonne= {$RECH['usID']} AND eaIDUser={$_SESSION['id']}";
+				$estabo=wa_bd_send_request($bd, $sql);
+				$EA=mysqli_fetch_assoc($estabo);
+				if($EA['count(eaDate)']==0){
+					echo
+					'<li class="resultatRecherche">',
+						'<img class="imgAuteur" alt="',$nom,'" src="',$photo,'"/>',
+		                '<p><a href="',$lienprofil,'">',$pseudo,'</a> ',$nom,'</p>',
+		                '<ul>',
+			            	'<li><a href="',$lienblabla,'">',$nbblablas,' blablas</a> - </li>',
+							'<li><a href="',$lienmentions,'">',$nbment,' mentions</a> - </li>',
+							'<li><a href="',$lienabooné,'">',$nbabo,' abonnés</a> - </li>',
+							'<li><a href="',$lienabonnement,'">',$nbabonnement,' abonnement</a></li>',
+						'</ul>';
+						if($_SESSION['id']!=$RECH['usID']){
+							MLM_GK_checkbox($bd,$RECH['usID'],$nom);
+						}
+				}
+				$arrayID[]=$RECH['usID'];
+			}
+			$count=$count+1;
+		}
+	echo
+		'</li>',
+		'</ul>',
+		'<input type=submit name=btnValider value=Valider />',
+	'</form>';
+}
 
 ?>
