@@ -18,12 +18,24 @@ error_reporting(E_ALL); // toutes les erreurs sont capturées (utile lors de la 
 ------------------------------------------------------------------------------*/
 
 // si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
-//wa_est_authentifie();
+if (wa_est_authentifie()){
+  header('Location: ../index.php');
+  exit();
+}
 
 // traitement si soumission des formulaires
 $err = isset($_POST['btnValider1']) ? wal_traitement_info_perso() : array();
 /*$err = isset($_POST['btnValider2']) ? wal_traitement_connexion() : array();
 $err = isset($_POST['btnValider3']) ? wal_traitement_connexion() : array();*/
+
+if(!isset($_POST['btnValider1'])){
+  $bd = wa_bd_connect();
+  $sql = "SELECT * FROM users WHERE usID = '".$_SESSION['id']."'"; 
+  $res = wa_bd_send_request($bd, $sql);
+  $t = mysqli_fetch_assoc($res);
+  mysqli_free_result($res);
+  mysqli_close($bd);
+}
 
 /*------------------------- Etape 2 --------------------------------------------
 - génération du code HTML de la page
@@ -52,122 +64,144 @@ ob_end_flush();
  * @global  array   $_POST
  */
 function wal_aff_formulaire(array $err): void {
+  global $t;
 
-    // réaffichage des données soumises en cas d'erreur, sauf les mots de passe 
-    if (isset($_POST['btnValider1'])){
-      $values = wa_html_proteger_sortie($_POST);
-    }
-    else{
-      $values['nomprenom'] = $values['naissance'] = $values['ville'] = $values['bio'] = '';
-    }
-
-    if (isset($_POST['btnValider2'])){
-      $values = wa_html_proteger_sortie($_POST);
-    }
-    else{
-      $values['email'] = $values['web'] = '';
-    }
-
-    if (count($err) > 0) {
-      echo '<p class="error">Les erreurs suivantes ont été détectées : ';
-      foreach ($err as $v) {
-          echo '<br> - ', $v;
-      }
-      echo '</p>';    
-    }
-
-
-    echo    
-            '<div id="divconnection">',
-            '<p>Cette page vous permet de modifier les informations relatives à votre compte. </p>',
-            '<br>',
-            '<h3>Informations personnelles</h3>',
-            '<form method="post" action="compte.php">',
-                '<table>';
-
-    wa_aff_ligne_input('Nom', array('type' => 'text', 'name' => 'nomprenom', 'value' => $values['nomprenom'], 'required' => null));
-    wa_aff_ligne_input('Date de naissance', array('type' => 'date', 'name' => 'naissance', 'value' => $values['naissance'], 'required' => null));
-    wa_aff_ligne_input('Ville', array('type' => 'text', 'name' => 'ville', 'value' => $values['ville']));
-    echo '<tr><td><p id="bio">Mini-bio</p></td><td><textarea name="bio" cols="40" rows="13">', $values['bio'] ,'</textarea></td></tr>';
-
-    echo 
-                    '<tr>',
-                        '<td colspan="2">',
-                            '<input type="submit" name="btnValider1" value="Valider">',
-                        '</td>',
-                    '</tr>',
-                '</table>',
-            '</form>',
-
-            '<h3>Informations sur voytre compte Cuiteur</h3>',
-            '<form method="post" action="compte.php">',
-                '<table>';
-
-    wa_aff_ligne_input('Adresse mail:', array('type' => 'email', 'name' => 'email', 'value' => $values['email'], 'required' => null));
-    wa_aff_ligne_input('Site web', array('type' => 'text', 'name' => 'web', 'value' => $values['web']));
-
-    echo 
-                    '<tr>',
-                        '<td colspan="2">',
-                            '<input type="submit" name="btnValider2" value="Valider">',
-                        '</td>',
-                    '</tr>',
-                '</table>',
-            '</form>',
-
-            '<h3>Paramètres de votre compte Cuiteur</h3>',
-            '<form method="post" action="compte.php">',
-                '<table>';
-
-    wa_aff_ligne_input('Votre mot de passe :', array('type' => 'password', 'name' => 'passe1', 'value' => ''));
-    wa_aff_ligne_input('Répétez le mot de passe :', array('type' => 'password', 'name' => 'passe2', 'value' => ''));
-    $photo="../upload/1.jpg";
-    $usAvecPhoto=0;
-    echo
+  // réaffichage des données soumises en cas d'erreur, sauf les mots de passe 
+  if (isset($_POST['btnValider1'])){
+    $values = wa_html_proteger_sortie($_POST);
+  }
+  else{
+    $bd = wa_bd_connect();
+    $sql = "SELECT * FROM users WHERE usID = '".$_SESSION['id']."'"; 
+    $res = wa_bd_send_request($bd, $sql);
+    $t = mysqli_fetch_assoc($res);
     
-        '<tr><td><p class="textform" id=photo>Votre photo actuelle</p></td><td><img src="',$photo,'" alt="nono"/></td></tr>',
-        '<tr><td></td><td>',
-        '<p>Taille 20ko maximum</p>',
-        '<p>Image JPG carrée (mini 50x50px)</p>',
-        wa_aff_ligne_input('', array('type' => 'file', 'name' => 'leFichier', 'value' => '', 'size' => '10', 'required' => null)),
-        '<tr><td><p class="textform">Utiliser votre photo</p></td>';
-  if($usAvecPhoto==0){
-    echo
-      '<td><input type="radio" name="pp" value="0" checked>
-      <label>non</label>
-      <input type="radio" name="pp" value="1">
-      <label>oui</label></td>';
-  }else{
-    echo
-      '<td><input type="radio" name="pp" value="0">
-      <label>non</label>
-      <input type="radio" name="pp" value="1" checked><label>oui</label></td>';
+    $values['nomprenom'] = isset($_POST['nomprenom'])?  wa_html_proteger_sortie($_POST['nomprenom']) : wa_html_proteger_sortie($t['usNom']);
+    $values['naissance'] = isset($_POST['naissance'])?  wa_html_proteger_sortie($_POST['naissance']) : wa_html_proteger_sortie($t['usDateNaissance']);
+    $values['ville'] = isset($_POST['ville'])?  wa_html_proteger_sortie($_POST['ville']) : wa_html_proteger_sortie($t['usVille']);
+    $values['bio'] = isset($_POST['bio'])?  wa_html_proteger_sortie($_POST['bio']) : wa_html_proteger_sortie($t['usBio']);
   }
 
-    echo 
-                    '<tr>',
-                        '<td colspan="2">',
-                            '<input type="submit" name="btnValider3" value="Valider">',
-                        '</td>',
-                    '</tr>',
-                '</table>',
-            '</form>',
-            '</div>';
+  if (isset($_POST['btnValider2'])){
+    $values = wa_html_proteger_sortie($_POST);
+  }
+  else{
+    $values['email'] = isset($_POST['email'])?  wa_html_proteger_sortie($_POST['email']) : wa_html_proteger_sortie($t['usMail']);
+    $values['web'] = isset($_POST['web'])?  wa_html_proteger_sortie($_POST['web']) : wa_html_proteger_sortie($t['usWeb']);
+
+    mysqli_free_result($res);
+    mysqli_close($bd);
+  }
+
+  if (count($err) > 0) {
+    echo '<p class="error">Les erreurs suivantes ont été détectées : ';
+    foreach ($err as $v) {
+        echo '<br> - ', $v;
+    }
+    echo '</p>';    
+  }
+
+
+  echo    
+          '<div id="divCompte">',
+          '<p>Cette page vous permet de modifier les informations relatives à votre compte. </p>',
+          '<br>',
+          '<h3>Informations personnelles</h3>',
+          '<form method="post" action="compte.php">',
+              '<table>';
+
+  wa_aff_ligne_input('Nom', array('type' => 'text', 'name' => 'nomprenom', 'value' => $values['nomprenom'], 'required' => null));
+  wa_aff_ligne_input('Date de naissance', array('type' => 'date', 'name' => 'naissance', 'value' => $values['naissance'], 'required' => null));
+  wa_aff_ligne_input('Ville', array('type' => 'text', 'name' => 'ville', 'value' => $values['ville']));
+  echo '<tr><td><p id="bio">Mini-bio</p></td><td><textarea name="bio" cols="40" rows="13">', $values['bio'] ,'</textarea></td></tr>';
+
+  echo 
+                  '<tr>',
+                      '<td colspan="2">',
+                          '<input type="submit" name="btnValider1" value="Valider">',
+                      '</td>',
+                  '</tr>',
+              '</table>',
+          '</form>',
+
+          '<h3>Informations sur voytre compte Cuiteur</h3>',
+          '<form method="post" action="compte.php">',
+              '<table>';
+
+  wa_aff_ligne_input('Adresse mail:', array('type' => 'email', 'name' => 'email', 'value' => $values['email'], 'required' => null));
+  wa_aff_ligne_input('Site web', array('type' => 'text', 'name' => 'web', 'value' => $values['web']));
+
+  echo 
+                  '<tr>',
+                      '<td colspan="2">',
+                          '<input type="submit" name="btnValider2" value="Valider">',
+                      '</td>',
+                  '</tr>',
+              '</table>',
+          '</form>',
+
+          '<h3>Paramètres de votre compte Cuiteur</h3>',
+          '<form method="post" action="compte.php">',
+              '<table>';
+
+  wa_aff_ligne_input('Votre mot de passe :', array('type' => 'password', 'name' => 'passe1', 'value' => ''));
+  wa_aff_ligne_input('Répétez le mot de passe :', array('type' => 'password', 'name' => 'passe2', 'value' => ''));
+  $photo="../upload/1.jpg";
+  $usAvecPhoto=0;
+  echo
+  
+      '<tr><td><p class="textform" id=photo>Votre photo actuelle</p></td><td><img src="',$photo,'" alt="nono"/></td></tr>',
+      '<tr><td></td><td>',
+      '<p>Taille 20ko maximum</p>',
+      '<p>Image JPG carrée (mini 50x50px)</p>',
+      wa_aff_ligne_input('', array('type' => 'file', 'name' => 'leFichier', 'value' => '', 'size' => '10', 'required' => null)),
+      '<tr><td><p class="textform">Utiliser votre photo</p></td>';
+if($usAvecPhoto==0){
+  echo
+    '<td><input type="radio" name="pp" value="0" checked>
+    <label>non</label>
+    <input type="radio" name="pp" value="1">
+    <label>oui</label></td>';
+}else{
+  echo
+    '<td><input type="radio" name="pp" value="0">
+    <label>non</label>
+    <input type="radio" name="pp" value="1" checked><label>oui</label></td>';
+}
+
+  echo 
+                  '<tr>',
+                      '<td colspan="2">',
+                          '<input type="submit" name="btnValider3" value="Valider">',
+                      '</td>',
+                  '</tr>',
+              '</table>',
+          '</form>',
+          '</div>';
 }
 
 function wal_traitement_info_perso(): array {
+  $erreurs = array();
   
   if( !wa_parametres_controle('post', array('nomprenom', 'naissance', 'ville', 'bio', 'btnValider1'))) {
+    $erreurs [] = 'Tous les champs doivent être remplis';
+    echo 'blabla',$_POST['pseudo'],'';
+    return $erreurs; 
+    $erreurs = array();
     wa_session_exit();   
   }
     
   foreach($_POST as &$val){
     $val = trim($val);
   }
-    
-  $erreurs = array();
 
   // vérification des noms et prenoms
+  if( !wa_parametres_controle('post', array('nomprenom', 'btnValider1'))) {
+    $erreurs [] = 'Tous les champs doivent être remplis';
+    echo $_POST['nomprenom'];
+    return $erreurs; 
+    $erreurs = array();
+  }
   if (empty($_POST['nomprenom'])) {
     $erreurs[] = 'Le nom et le prénom doivent être renseignés.'; 
   }
@@ -185,8 +219,21 @@ function wal_traitement_info_perso(): array {
         }
     }
   }
+  $bd = wa_bd_connect();
+  $nomprenom = wa_bd_proteger_entree($bd, $_POST['nomprenom']);
+  $sql = "UPDATE user SET usNom = '$nomprenom' WHERE usID = ".$_SESSION['id']; 
+  wa_bd_send_request($bd, $sql);
+  mysqli_close($bd);
+  header('Location: compte.php'); //TODO : à modifier dans le projet
+  exit();
 
   // vérification de la date de naissance
+  if( !wa_parametres_controle('post', array('naissance', 'btnValider1'))) {
+    $erreurs [] = 'Tous les champs doivent être remplis';
+    echo $_POST['naissance'];
+    return $erreurs; 
+    $erreurs = array();
+  }
   if (empty($_POST['naissance'])){
     $erreurs[] = 'La date de naissance doit être renseignée.'; 
   }
@@ -207,8 +254,21 @@ function wal_traitement_info_perso(): array {
       }
     }
   }
+  $bd = wa_bd_connect();
+  $naissance = wa_bd_proteger_entree($bd, $_POST['naissance']);
+  $sql = "UPDATE user SET usDateNaissance = '$naissance' WHERE usID = ".$_SESSION['id']; 
+  wa_bd_send_request($bd, $sql);
+  mysqli_close($bd);
+  header('Location: compte.php'); //TODO : à modifier dans le projet
+  exit();
 
   // vérification de la ville
+  if( !wa_parametres_controle('post', array('ville', 'btnValider1'))) {
+    $erreurs [] = 'Tous les champs doivent être remplis';
+    echo $_POST['ville'];
+    return $erreurs; 
+    $erreurs = array();
+  }
   if (mb_strlen($_POST['ville'], 'UTF-8') > LMAX_VILLE){
     $erreurs[] = 'La ville ne peut pas dépasser ' . LMAX_VILLE . ' caractères.';
   }
@@ -216,8 +276,21 @@ function wal_traitement_info_perso(): array {
   if ($noTags != $_POST['ville']){
     $erreurs[] = 'La ville ne peut pas contenir de code HTML.';
   }
+  $bd = wa_bd_connect();
+  $ville = wa_bd_proteger_entree($bd, $_POST['ville']);
+  $sql = "UPDATE user SET usVille = '$ville' WHERE usID = ".$_SESSION['id']; 
+  wa_bd_send_request($bd, $sql);
+  mysqli_close($bd);
+  header('Location: compte.php'); //TODO : à modifier dans le projet
+  exit();
 
   // vérification de la mini-bio
+  if( !wa_parametres_controle('post', array('bio', 'btnValider1'))) {
+    $erreurs [] = 'Tous les champs doivent être remplis';
+    echo $_POST['bio'];
+    return $erreurs; 
+    $erreurs = array();
+  }
   if (mb_strlen($_POST['bio'], 'UTF-8') > LMAX_BIO){
     $erreurs[] = 'La mini-bio ne peut pas dépasser ' . LMAX_BIO . ' caractères.';
   }
@@ -225,18 +298,20 @@ function wal_traitement_info_perso(): array {
   if ($noTags != $_POST['bio']){
     $erreurs[] = 'La mini-bio ne peut pas contenir de code HTML.';
   }
-
-  // s'il n'y a pas d'erreurs ==> on retourne un message de réussite
-  if (count($erreurs) == 0) {
-    $bd = wa_bd_connect();
-    echo '<p class="update">Mises à jour ok.</p>';    
-  }
+  $bd = wa_bd_connect();
+  $bio = wa_bd_proteger_entree($bd, $_POST['bio']);
+  $sql = "UPDATE user SET usBio = '$bio' WHERE usID = ".$_SESSION['id']; 
+  wa_bd_send_request($bd, $sql);
+  mysqli_close($bd);
+  header('Location: compte.php'); //TODO : à modifier dans le projet
+  exit();
 
   // s'il y a des erreurs ==> on retourne le tableau d'erreurs    
   if (count($erreurs) > 0) {  
     return $erreurs;
   }
 
+  /*$bd = wa_bd_connect();
   // pas d'erreurs ==> enregistrement de l'utilisateur
   $nomprenom = wa_bd_proteger_entree($bd, $_POST['nomprenom']);
   $ville = wa_bd_proteger_entree($bd, $_POST['ville']);
@@ -244,21 +319,20 @@ function wal_traitement_info_perso(): array {
   
   $aaaammjj = $annee*10000  + $mois*100 + $jour;
   
-  $sql = "INSERT INTO users(usNom, usVille, usBio, usDateNaissance) 
-          VALUES ('$nomprenom', '$ville', '$bio', $aaaammjj)";
+  $sql = "UPDATE users SET usNom = '$nomprenom', usVille = '$ville', usBio = '$bio', usDateNaissance = $aaaammjj
+          WHERE usID = ".$_SESSION['id'];
           
-  $res = wa_bd_send_request($bd, $sql);
+  wa_bd_send_request($bd, $sql);
   
   // mémorisation de l'ID dans une variable de session 
   // cette variable de session permet de savoir si le client est authentifié
-  $_SESSION['usID'] = mysqli_insert_id($bd);
+  $_SESSION['id'] = mysqli_insert_id($bd);
   
   // libération des ressources
-  mysqli_free_result($res);
   mysqli_close($bd);
 
-  header('Location: protegee.php'); //TODO : à modifier dans le projet
-  exit();
+  header('Location: compte.php'); //TODO : à modifier dans le projet
+  exit();*/
 }
 
 /*

@@ -168,6 +168,12 @@ header {
     position: relative;
 }
 
+#deconn{
+    background: url(../images/entete_deconnecte.jpg) no-repeat;
+    height: 270px;
+    position: relative;
+}
+
 
 /* Tous les éléments descendants de l'élément header sont positionnés en absolu.
  * Comme l'élément header est en positionnement relatif, cet élément header est le bloc conteneur 
@@ -377,17 +383,66 @@ strong {
     font-weight: bold;
 }
 
-#divconnection {
+#divCompte {
     float: right;
     height: auto;
     width: 550px;
 }
 
-#divconnection h3 {
+#divCompte h3 {
     font-weight: bold;
     border-bottom: 3px solid;
 }
 
+#resultRech {
+    font-weight: bold;
+    border-bottom: 3px solid;
+}
+
+#soustitre{
+    line-height: 12px;
+}
+
+#soustitre img{
+    float: left;
+}
+
+#soustitre STRONG{
+    margin-left: 10px;
+}
+
+#soustitre ul{
+    margin-left: 24px;
+}
+
+#infoUtilisateur li{
+	background: none;
+    margin: auto;
+    padding: auto;
+    border-radius: auto;
+}
+
+#descriptionUtilisateur{
+	clear: both;
+	text-align: left;
+    margin-top: 30px;
+    line-height: 30px;
+}
+
+#infoCompte{
+	clear: both;
+    margin-left: 80px;
+    line-height: 30px;
+}
+
+.resultatRecherche{
+	background-image: url("../images/fond_blabla.png");
+	padding-top: 5px;
+	margin-left: 25px;
+	padding-bottom: 30px;
+	margin-bottom: 10px;
+	padding-left: 5px;
+}
 
 /* ---------------------------------------------------------------
     FORMULAIRE

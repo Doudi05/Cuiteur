@@ -290,7 +290,7 @@ function wa_html_proteger_sortie(array|string $content): array|string {
 *  Si on lui transmet un tableau, la fonction renvoie un tableau où toutes les chaines
 *  qu'il contient sont protégées, les autres données du tableau ne sont pas modifiées.  
 *   
-*  @param    objet          $bd         l'objet représentant la connexion au serveur MySQL
+*  @param    mysqli          $bd         l'objet représentant la connexion au serveur MySQL
 *  @param    array|string   $content    la chaine à protéger ou un tableau contenant des chaines à protéger 
 *  @return   array|string               la chaîne protégée ou le tableau
 */  
@@ -407,6 +407,175 @@ function blablaTest($blablas){
         $blablas=4;
     }
     return $blablas;
+}
+
+/**
+ * Fonction qui permet de determiner si un utilisateur a enregistrer un photo de profil , si oui il retourne son chemin d'acces.
+ *
+ * @param int    $usID    l'ID de l'utilisateur concerné.
+ * @param int    $usAvecPhoto   variable qui permet de savoir si il possede un photo dans la BD
+ * @return string   $photo   retourne le chemin d'acces a la photo de profil de l'utilisateur
+ */
+function profilePicture($usID , $usAvecPhoto){
+    if($usAvecPhoto == 1){
+        $photo='../upload/';
+        $photo.=$usID.'.jpg';
+        return $photo;
+    }
+    $photo='../images/anonyme.jpg';
+    return $photo;
+}
+
+/**
+ * Fonction qui retourne une valeur crypter pour securiter les liens
+ *
+ * @param string    $texte   la variable a crypter
+ * @return  string  $str     retour de la varuable crypter
+ */
+function cryptage($texte){
+    $plaintext = $texte;
+    $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+    $iv = openssl_random_pseudo_bytes($ivlen);
+    $key = 'toto';
+    $ciphertext_raw = openssl_encrypt($plaintext, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+    $hmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+    $ciphertext = base64_encode( $iv.$hmac.$ciphertext_raw );
+    return urlencode($ciphertext);
+}
+
+/**
+ * Fonction qui retourne une valeur decrypter pour utiliser les valeurs passer en parametres dans les liens (method $_GET)
+ *
+ * @param   string  $texte   la variable a decrypter
+ * @return  string  $str     retour de la varuable decrypter
+ */
+function decryptage($ciphertext){
+    $c = base64_decode($ciphertext);
+    $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+    $iv = substr($c, 0, $ivlen);
+    $hmac = substr($c, $ivlen, $sha2len=32);
+    $ciphertext_raw = substr($c, $ivlen+$sha2len);
+    $key = 'toto';
+    $original_plaintext = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+    $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+    if (hash_equals($hmac, $calcmac)){
+        return $original_plaintext;
+    }
+    header('location: cuiteur.php');
+}
+
+/**
+ *Requete donnant les tedances dans le bloc aside
+ *
+ */
+function get_Request_Aside_Tags()
+{
+	return 'SELECT taID,	COUNT(taID) AS taOccurence  
+	    FROM tags
+	    GROUP BY taID
+	    ORDER BY taOccurence DESC, taID DESC';
+}
+
+//___________________________________________________________________
+/**
+ *Requete donnant les information de l'utilisateur d�sir� dans user
+ *
+ *@param		int		$usID	ID de l'utilisateur d�sir�
+ */
+function get_Request_User($usID)
+{
+	return 'SELECT *
+		FROM users
+		WHERE usID='.$usID;
+}
+
+//___________________________________________________________________
+/**
+ *Requete donnant le nombre de blablas post�s de l'utilisateur d�sir�
+ *
+ *@param		int		$usID	ID de l'utilisateur d�sir�
+ */
+function get_Request_User_Count_Blablas($usID)
+{
+	return 'SELECT COUNT(blIDAuteur) AS blablas
+		FROM blablas
+		WHERE blIDAuteur=\''.($usID).'\'';
+}
+
+//___________________________________________________________________
+/**
+ *Requete donnant le nombre de mentions de l'utilisateur d�sir�
+ *
+ *@param		int		$usID	ID de l'utilisateur d�sir�
+ */
+function get_Request_User_Count_Mentions($usID)
+{
+	return 'SELECT COUNT(meIDUser) AS mentions
+		FROM mentions
+		WHERE meIDUser=\''.($usID).'\'';
+}
+
+//___________________________________________________________________
+/**
+ *Requete donnant le nombre d'abonn�s de l'utilisateur d�sir�
+ *
+ *@param		int		$usID	ID de l'utilisateur d�sir�
+ */
+function get_Request_User_Count_Abonnes($usID)
+{
+	return 'SELECT COUNT(eaIDUser) AS abonne
+		FROM estabonne
+		WHERE eaIDUser=\''.($usID).'\'';
+}
+
+//___________________________________________________________________
+/**
+ *Requete donnant le nombre d'abonnements de l'utilisateur d�sir�
+ *
+ *@param		int		$usID	ID de l'utilisateur d�sir�
+ */
+function get_Request_User_Count_Abonnements($usID)
+{
+	return 'SELECT COUNT(eaIDAbonne) AS abonnements
+		FROM estabonne
+		WHERE eaIDAbonne=\''.($usID).'\'';
+}
+
+//___________________________________________________________________
+/**
+ *Requete v�rifiant si un utilisateur est abonn� a un autre
+ *
+ *@param		int		$usID	ID de l'utilisateur potentiellement abonn�
+ *@param		int		$utID	ID de l'utilisateur auquel on est potentiellement abonn�
+ */
+function get_Request_Watching_User($usID, $utID)
+{
+	return 'SELECT eaIDAbonne 
+		FROM estabonne
+		WHERE eaIDUser=\''.$utID.'\'
+		AND eaIDAbonne=\''.$usID.'\'';
+}
+
+//___________________________________________________________________
+/**
+ *Requete donnant les suggestions pour le aside
+ *
+ *@param		int		$usID	ID de l'utilisateur d�sir�
+ */
+function get_Request_Suggestions_Aside($usID)
+{
+	return "SELECT *
+			FROM users
+			WHERE usID IN (SELECT eaIDUser
+							FROM estabonne
+							WHERE eaIDAbonne IN (SELECT eaIDAbonne
+											FROM estabonne
+											WHERE eaIDUser='".$usID."'
+											)
+							)
+			AND usID!='".$usID."'
+			ORDER BY RAND()
+			LIMIT 2";
 }
 
 ?>
