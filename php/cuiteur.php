@@ -23,6 +23,13 @@ if (wa_est_authentifie()){
     exit();
 }
 
+// verification de l'existance de la variable blablas
+if (!isset($_GET['blablas'])) {
+  	$nbblablas=4;
+}else{
+	$nbblablas=blablaTest($_GET['blablas']);
+}
+
 //_______________________________________________________________________________________________________
 /*
 *Fonction permettant de poster un blabla
@@ -259,6 +266,8 @@ $existbl=wa_bd_send_request($bd, $sql);
 $B=mysqli_fetch_assoc($existbl);
 $nombrebl=$B['COUNT(blID)'];
 
+$php="cuiteur.php";
+
 if($nombrebl!=0){
     //Requete pour recuperer tout les blablas a afficher dans cuiteur de l'utilisateur
     $sql= "SELECT auteur.usID AS autID, auteur.usPseudo AS autPseudo, auteur.usNom AS autNom, auteur.usAvecPhoto AS autPhoto, blID, blTexte, blDate, blHeure, origin.usID AS oriID, origin.usPseudo AS oriPseudo, origin.usNom As oriNom, origin.usAvecPhoto AS oriPhoto 
@@ -275,9 +284,9 @@ if($nombrebl!=0){
                             WHERE meIDUser = {$_SESSION['id']})                  
         ORDER BY blID DESC";
     $res=wa_bd_send_request($bd, $sql);
-    (wa_aff_blablas($res, $countBlablas)>=$countBlablas);
+    (wa_aff_blablas($res, $nombrebl));
 }else{
-    (wa_aff_blablas($existbl, $countBlablas)>=$countBlablas);
+    (wa_aff_blablas($existbl, $nombrebl));
 }
 
 wa_aff_pied();

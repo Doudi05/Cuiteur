@@ -168,7 +168,7 @@ header {
     position: relative;
 }
 
-#deconn{
+#deconn {
     background: url(../images/entete_deconnecte.jpg) no-repeat;
     height: 270px;
     position: relative;
@@ -399,6 +399,80 @@ strong {
     border-bottom: 3px solid;
 }
 
+#infoUtilisateur {
+    font-weight: bold;
+}
+
+#infoUtilisateur li {
+    background: none;
+}
+
+#descriptionUtilisateur {
+    clear: both;
+    text-align: left;
+    margin-top: 30px;
+    line-height: 30px;
+}
+
+#descriptionUtilisateur td:first-child {
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+#descriptionUtilisateur td {
+    padding-right: 20px;
+}
+
+#infoAbo {
+    margin-top: -10px;
+}
+
+main ul li ul li {
+    background: none;
+}
+
+.abodesabo {
+    float: right;
+    position: relative;
+    bottom: 20px;
+}
+
+#blablavide {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 50px;
+    font-size: 20px;
+}
+
+/*tendance.php*/
+h2{
+	font-size: 20px;
+	font-weight: bold;
+	margin-top: 10px;
+}
+
+#tendance{
+	float: right;
+	height: auto;
+	width: 550px;
+}
+
+ol{
+	list-style-type: decimal;
+}
+
+ol li{
+	margin-bottom: 10px;
+	margin-left: 50px;
+
+    background: none;
+    /* margin: 0 0 10px 25px;
+    padding: 5px 5px 5px 35px; */
+}
+
+
 /* ---------------------------------------------------------------
     FORMULAIRE
 --------------------------------------------------------------- */
@@ -437,7 +511,9 @@ main input[type="reset"] {
     width: 142px;
     height: 42px;
     padding-bottom: 5px;
-    margin: 0 20px 0 20px;
+    margin: 0 80px 30px 20px;
+    text-align: center;
+    float: right;
 }
 
 main input[type="submit"]:hover,

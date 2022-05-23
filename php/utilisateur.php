@@ -6,13 +6,15 @@ session_start();
 require_once 'bibli_generale.php';
 require_once 'bibli_cuiteur.php';
 
+error_reporting(E_ALL); // toutes les erreurs sont capturées (utile lors de la phase de développement)
+
 // if user is not authenticated, redirect to index.php
 if (wa_est_authentifie()){
     header('Location: utilisateur.php');
     exit;
 }
 
-$db = wa_bd_connect();
+$bd = wa_bd_connect();
 
 /*------------------------------------------------------------------------------
 - Get user's data (current user if id is not set or invalid)
@@ -27,7 +29,7 @@ $sqlUserData = "SELECT users.*
                 FROM users
                 WHERE users.usID = $id";
 
-$userData = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['db'], $sqlUserData));
+$userData = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['bd'], $sqlUserData));
 
 $sqlStats = "SELECT COUNT(*) AS nbBlablas
              FROM blablas
@@ -36,20 +38,16 @@ $sqlStats = "SELECT COUNT(*) AS nbBlablas
              SELECT COUNT(*) AS nbMentions
              FROM mentions
              WHERE mentions.meIDUser = $id";
-$stats = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['db'], $sqlStats));
+$stats = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['bd'], $sqlStats));
 
-echo '<pre>';
-print_r($userData);
-print_r($stats);
-echo '</pre>';
-die;
+
 
 // if user is not found, get current user's data
-if (! $userData){
+if (!$userData){
     $sqlUserData = "SELECT *
                FROM users
                WHERE usId = ". $_SESSION['usID'];
-    $userData = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['db'], $sqlUserData));
+    $userData = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['bd'], $sqlUserData));
 }
 
 $userData = wa_html_proteger_sortie($userData);
@@ -70,12 +68,14 @@ $G=mysqli_fetch_assoc($test);
 if($G['COUNT(usID)']=='0'){
 	wa_aff_entete("Cette utilisateur n\'éxiste pas");
 }else{
-	wa_aff_entete("Le profil de", $userData['usPseudo']);
+	wa_aff_entete("Le profil de ". $userData['usPseudo'] . "");
 }
 
 wa_aff_infos(true);
 
-wa_aff_user_info($userData);
+if($G['COUNT(usID)']!='0'){
+	wa_afficher_profil($bd, $id, "utilisateur");
+}
 
 wa_aff_pied();
 wa_aff_fin();
@@ -84,23 +84,6 @@ wa_aff_fin();
 ob_end_flush();
 
 // free resources
-mysqli_close($db);
+mysqli_close($bd);
 
-// ----------  Local functions ----------- //
-
-/**
- * Show user's info
- *
- * @param array $userData User's data
- */
-function wa_aff_user_info(array $userData){
-    $photoProfilPath = $userData['usAvecPhoto'] == '1' ? '../upload/'. $userData['usID'] .'.jpg' : '../images/anonyme.jpg';
-    echo '<p>',
-            '<img src="', $photoProfilPath, '" alt="Photo de profil" class="photoProfil">',
-            wa_html_a('./utilisateur.php?id='. $userData['usID'], $userData['usPseudo']), ' ', $userData['usNom'],
-            wa_html_a('./blablas.php?id='. $userData['usID'], $userData['nbBlablas'] .' blabla'. ($userData['nbBlablas'] > 1 ? 's' : '')),
-            wa_html_a('./mentions.php?id='. $userData['usID'], $userData['nbMentions'] .' mention'. ($userData['nbMentions'] > 1 ? 's' : '')),
-            wa_html_a('./abonnes.php?id='. $userData['usID'], $userData['nbAbonnes'] .' abonnement'. ($userData['nbAbonnes'] > 1 ? 's' : '')),
-            wa_html_a('./abonnements.php?id='. $userData['usID'], $userData['nbAbonnements'] .' abonné'. ($userData['nbAbonnements'] > 1 ? 's' : '')),
-            '</p>';
-}
+?>

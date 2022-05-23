@@ -86,7 +86,7 @@ if(isset($_POST['recherche']) && $_POST['saisie']!=''){
             '<br>',
 			'<h2 id=resultRech>Résultats de la recherche</h2>',
             '<br>';
-		    MLM_GK_aff_recherche($bd,$recherche);
+		    wa_aff_recherche($bd,$recherche);
 	}
 }
 echo
