@@ -1,5 +1,4 @@
 # Cuiteur
 
 #Choses à revoir :
-1. index + inscription : 'required' => null ou true ?
-2. 
+1. Page compte erreur, vérifier bd si bien close
