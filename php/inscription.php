@@ -11,15 +11,15 @@ session_start();
 require_once 'bibli_generale.php';
 require_once 'bibli_cuiteur.php';
 
+error_reporting(E_ALL); // toutes les erreurs sont capturées (utile lors de la phase de développement)
+
 /*------------------------- Etape 1 --------------------------------------------
 - vérifications diverses et traitement des soumissions
 ------------------------------------------------------------------------------*/
 
-// si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
-// si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
+// si utilisateur déjà authentifié, on le redirige vers la page cuiteur.php
 if (wa_est_authentifie()){
-    $chemin = isset($_POST['redirection'])? $_POST['redirection'] : 'cuiteur.php';
-    header('Location: '.$chemin);
+    header('Location: cuiteur.php');
     exit();
 }
 
@@ -33,11 +33,13 @@ $er = isset($_POST['btnSInscrire']) ? eml_traitement_inscription() : array();
 wa_aff_debut('Cuiteur | Inscription', '../styles/cuiteur.css');
 
 wa_aff_entete('Inscription');
+
 wa_aff_infos(false);
 
 eml_aff_formulaire($er);
 
 wa_aff_pied();
+
 wa_aff_fin();
 
 // facultatif car fait automatiquement par PHP
@@ -71,7 +73,7 @@ function eml_aff_formulaire(array $err): void {
 
 
     echo    
-            '<p>Pour vous inscrire, merci de fournir les informations suivantes. </p>',
+            '<p>Pour vous inscrire, merci de fournir les informations suivantes.</p>',
             '<form method="post" action="inscription.php">',
                 '<table>';
 
@@ -86,12 +88,14 @@ function eml_aff_formulaire(array $err): void {
     echo 
                     '<tr>',
                         '<td colspan="2">',
+                            
+                            '<input type="reset" value="Réinitialiser">',
                             '<input type="submit" name="btnSInscrire" value="S\'inscrire">',
-                            '<input type="reset" value="Réinitialiser">', 
                         '</td>',
                     '</tr>',
                 '</table>',
-            '</form>';
+            '</form>',
+            '<p id="texteBasPageIns">Déjà inscrit(e), <a href="../index.php"><STRONG>Connectez-vous</STRONG></a>.</p>';
 }
 
 /**
@@ -100,7 +104,7 @@ function eml_aff_formulaire(array $err): void {
  *      Etape 1. vérification de la validité des données
  *                  -> return des erreurs si on en trouve
  *      Etape 2. enregistrement du nouvel inscrit dans la base
- *      Etape 3. ouverture de la session et redirection vers la page protegee.php 
+ *      Etape 3. ouverture de la session et redirection vers la page compte.php 
  *
  * Toutes les erreurs détectées qui nécessitent une modification du code HTML sont considérées comme des tentatives de piratage 
  * et donc entraînent l'appel de la fonction wa_session_exit() sauf :
@@ -115,7 +119,7 @@ function eml_aff_formulaire(array $err): void {
  */
 function eml_traitement_inscription(): array {
     
-    if( !wa_parametres_controle('post', array('pseudo', 'email', 'nomprenom', 'naissance', 
+    if(!wa_parametres_controle('post', array('pseudo', 'email', 'nomprenom', 'naissance', 
                                               'passe1', 'passe2', 'btnSInscrire'))) {
         wa_session_exit();   
     }
@@ -174,11 +178,7 @@ function eml_traitement_inscription(): array {
         if (mb_strlen($_POST['email'], 'UTF-8') > LMAX_EMAIL){
             $erreurs[] = 'L\'adresse mail ne peut pas dépasser '.LMAX_EMAIL.' caractères.';
         }
-        // la validation faite par le navigateur en utilisant le type email pour l'élément HTML input
-        // est moins forte que celle faite ci-dessous avec la fonction filter_var()
-        // Exemple : 'l@i' passe la validation faite par le navigateur et ne passe pas
-        // celle faite ci-dessous
-        if(! filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        if(!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
             $erreurs[] = 'L\'adresse mail n\'est pas valide.';
         }
     }
@@ -188,7 +188,7 @@ function eml_traitement_inscription(): array {
         $erreurs[] = 'La date de naissance doit être renseignée.'; 
     }
     else{
-        if( !mb_ereg_match('^\d{4}(-\d{2}){2}$', $_POST['naissance'])){ //vieux navigateur qui ne supporte pas le type date ?
+        if(!mb_ereg_match('^\d{4}(-\d{2}){2}$', $_POST['naissance'])){ //vieux navigateur qui ne supporte pas le type date ?
             $erreurs[] = 'la date de naissance doit être au format "AAAA-MM-JJ".'; 
         }
         else{
@@ -227,7 +227,6 @@ function eml_traitement_inscription(): array {
             // libération des ressources 
             mysqli_free_result($res);
         }
-        
     }
     
     // s'il y a des erreurs ==> on retourne le tableau d'erreurs    
@@ -253,15 +252,14 @@ function eml_traitement_inscription(): array {
     
     // mémorisation de l'ID dans une variable de session 
     // cette variable de session permet de savoir si le client est authentifié
-    $_SESSION['usID'] = mysqli_insert_id($bd);
+    $_SESSION['id'] = mysqli_insert_id($bd);
     
     // libération des ressources
     mysqli_close($bd);
     
-    // redirection vers la page protegee.php
-    header('Location: compte.php'); //TODO : à modifier dans le projet
+    // redirection vers la page compte.php
+    header('Location: compte.php');
     exit();
 }
-
 
 ?>

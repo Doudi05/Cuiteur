@@ -168,7 +168,7 @@ header {
     position: relative;
 }
 
-#deconn{
+#deconn {
     background: url(../images/entete_deconnecte.jpg) no-repeat;
     height: 270px;
     position: relative;
@@ -330,7 +330,7 @@ main {
     margin: 20px 0 0 250px;
 }
 
-main li:not(.plusBlablas) {
+main li:not(.plusBlablas):not(.tend) {
     background: url(../images/fond_blabla.png);
     margin: 0 0 10px 25px;
     padding: 5px 5px 5px 35px;
@@ -399,49 +399,102 @@ strong {
     border-bottom: 3px solid;
 }
 
-#soustitre{
-    line-height: 12px;
+#infoUtilisateur {
+    font-weight: bold;
 }
 
-#soustitre img{
-    float: left;
+#infoUtilisateur li {
+    background: none;
 }
 
-#soustitre STRONG{
-    margin-left: 10px;
-}
-
-#soustitre ul{
-    margin-left: 24px;
-}
-
-#infoUtilisateur li{
-	background: none;
-    margin: auto;
-    padding: auto;
-    border-radius: auto;
-}
-
-#descriptionUtilisateur{
-	clear: both;
-	text-align: left;
+#descriptionUtilisateur {
+    clear: both;
+    text-align: left;
     margin-top: 30px;
     line-height: 30px;
 }
 
-#infoCompte{
-	clear: both;
-    margin-left: 80px;
-    line-height: 30px;
+#descriptionUtilisateur td:first-child {
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
 }
 
-.resultatRecherche{
-	background-image: url("../images/fond_blabla.png");
-	padding-top: 5px;
-	margin-left: 25px;
-	padding-bottom: 30px;
-	margin-bottom: 10px;
-	padding-left: 5px;
+#descriptionUtilisateur td {
+    padding-right: 20px;
+}
+
+#infoAbo {
+    margin-top: -10px;
+}
+
+main ul li ul li {
+    background: none;
+}
+
+.abodesabo {
+    float: right;
+    position: relative;
+    bottom: 20px;
+}
+
+#blablavide {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 50px;
+    font-size: 20px;
+}
+
+
+/*tendance.php*/
+h2{
+	font-size: 20px;
+	font-weight: bold;
+	margin-top: 20px;
+}
+
+#annee{
+    margin-top: 50px;
+}
+
+#tendance{
+	float: right;
+	height: auto;
+	width: 550px;
+}
+
+ol{
+	list-style-type: decimal;
+}
+
+li.tend{
+	margin: 0 0 10px 50px;
+    padding: 0px 0px 0px 0px;
+    background: none;
+    font-weight: bold;
+}
+
+
+/*index.php*/
+#blockConnexion {
+    float: right;
+    height: 140px;
+    width: 490px;
+}
+
+#blockConnexion input[type="submit"]{
+    margin: -10px 145px 0 0;
+}
+
+#texteBasPageCo{
+	margin-top: 160px;
+}
+
+
+/*inscription.php*/
+#texteBasPageIns{
+	margin-top: -30px;
 }
 
 /* ---------------------------------------------------------------
@@ -482,7 +535,10 @@ main input[type="reset"] {
     width: 142px;
     height: 42px;
     padding-bottom: 5px;
-    margin: 0 20px 0 20px;
+    /* margin: 0 80px 30px 20px; */
+    margin: 0 65px 30px -25px;
+    text-align: center;
+    float: right;
 }
 
 main input[type="submit"]:hover,
@@ -503,13 +559,13 @@ main input[type="reset"]:hover {
 }
 
 .update {
-    border: solid 2px #0F0;
+    border: solid 2px rgb(27, 128, 2);
     border-radius: 5px;
-    color: #0F0;
+    color: rgb(27, 128, 2);
     font-weight: bold;
     padding: 5px;
     margin: 10px;
-    background: rgba(255, 255, 255, 0.637);
+    background: rgba(255, 255, 255, 0.6);
 }
 
 #bio {

@@ -58,7 +58,7 @@ if (isset($_POST['btnValider'])) {
 
 ///////////HTML//////////////
 //debut du html
-wa_aff_debut('Cuiteur | Abonnement', '../styles/cuiteur.css');
+wa_aff_debut('Cuiteur | Abonnés', '../styles/cuiteur.css');
 //header du html
 /*REQUETE POUR AVOIR LES INFOS DE LA TABLE USERS*/
 $sql= "SELECT * , COUNT(blID)
@@ -70,10 +70,10 @@ $I=mysqli_fetch_assoc($info);
 $pseudo=wa_bd_send_request($bd, $sql);
 $P=mysqli_fetch_assoc($pseudo);
 if ($_SESSION['id']==decryptage($_GET['id'])) {
-    wa_aff_entete("Mes abonnements");
+    wa_aff_entete("Mes abonnés");
 }else{
     //$pse=wa_html_proteger_sortie($P['usPseudo']);
-    wa_aff_entete("Les abonnement de {$P['usPseudo']}");
+    wa_aff_entete("Les abonnés de {$P['usPseudo']}");
 }
 
 //patie infos du html
@@ -92,14 +92,14 @@ $T=mysqli_fetch_assoc($test);
 if($T['COUNT(eaIDAbonne)']==0){
     //a revoir pour le div
     echo '<div id="blablavide">',
-            '<p>Aucun abonnement à afficher</p>',
+            '<p>Aucun abonné à afficher</p>',
         '</div>';
 }else{
     if($G['COUNT(usID)']!='0'){
         wa_afficher_profil($bd, $id, "");
     }
 
-    $sql="SELECT * FROM users , estabonne WHERE eaIDUser='$id' AND usID = eaIDAbonne";
+    $sql="SELECT * FROM users , estabonne WHERE eaIDAbonne='$id' AND usID = eaIDUser";
     $recherche=wa_bd_send_request($bd, $sql);
     echo '<div id=divCompte>';
         wa_aff_recherche($bd,$recherche);

@@ -70,40 +70,50 @@ $I=mysqli_fetch_assoc($info);
 $pseudo=wa_bd_send_request($bd, $sql);
 $P=mysqli_fetch_assoc($pseudo);
 if ($_SESSION['id']==decryptage($_GET['id'])) {
-    wa_aff_entete("Mes abonnements");
+    wa_aff_entete("Mes mentions");
 }else{
     //$pse=wa_html_proteger_sortie($P['usPseudo']);
-    wa_aff_entete("Les abonnement de {$P['usPseudo']}");
+    wa_aff_entete("Les mentions de {$P['usPseudo']}");
 }
 
 //patie infos du html
 wa_aff_infos($bd, true);
 
-/*REQUETE POUR AVOIR LE NOMBRE D'ABONNEMENT*/
-$nbabonnement= "SELECT COUNT(eaIDAbonne)
-        FROM estabonne
-        WHERE eaIDUser='$id'";
-$abo=wa_bd_send_request($bd, $nbabonnement);
-$A=mysqli_fetch_assoc($abo);
+//REQUETE SQL QUI PERMET DE SAVOIR SI IL EXISTE DES BLABLAS A AFFICHER
+$bl= "SELECT COUNT(blID) , usPseudo
+		FROM users ,blablas
+		WHERE users.usID = '$id'
+		AND blIDAuteur = usID";
+$existbl=wa_bd_send_request($bd, $bl);
+$B=mysqli_fetch_assoc($existbl);
+$nombrebl=wa_html_proteger_sortie($B['COUNT(blID)']);
 
-$test=wa_bd_send_request($bd, $nbabonnement);
-$T=mysqli_fetch_assoc($test);
-
-if($T['COUNT(eaIDAbonne)']==0){
+if($nombrebl==0){
     //a revoir pour le div
     echo '<div id="blablavide">',
-            '<p>Aucun abonnement à afficher</p>',
+            '<p>Aucune mention à afficher</p>',
         '</div>';
 }else{
     if($G['COUNT(usID)']!='0'){
         wa_afficher_profil($bd, $id, "");
     }
 
-    $sql="SELECT * FROM users , estabonne WHERE eaIDUser='$id' AND usID = eaIDAbonne";
-    $recherche=wa_bd_send_request($bd, $sql);
-    echo '<div id=divCompte>';
-        wa_aff_recherche($bd,$recherche);
-    echo '</div>';
+    echo '<br><br><br><br><br>';
+
+    //REQUETE SQL QUI PERMET DE RECUPERER TOUTE LES MENTIONS DE L UTILISATEUR
+	//revoir la requette
+	$sql = "SELECT auteur.usID AS autID, auteur.usPseudo AS autPseudo, auteur.usNom AS autNom, auteur.usAvecPhoto AS autPhoto,blID,  blTexte, blDate, blHeure, origin.usID AS oriID, origin.usPseudo AS oriPseudo, origin.usNom As oriNom, origin.usAvecPhoto AS oriPhoto
+    FROM blablas 
+    INNER JOIN mentions ON meIDBlabla = blID
+    INNER JOIN users AS auteur ON blIDAuteur=usID
+    LEFT OUTER JOIN users AS origin ON blIDAutOrig=origin.usID
+    WHERE meIDUser='$id'
+    ORDER BY blID DESC";
+    $sqlblablas=wa_bd_send_request($bd, $sql);
+    //affichage des blablas
+    echo '<ul>';
+        wa_aff_blablas($bd, $sqlblablas);
+    echo '</ul>';
 }
 //affichage du pied de page 
 wa_aff_pied();

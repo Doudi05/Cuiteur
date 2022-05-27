@@ -394,6 +394,32 @@ function wa_aff_ligne_input(string $libelle, array $attributs = array(), string 
 */
 
 /**
+* Convert a date from yyyymmdd to yyyy-mm-dd format to show it in a date input field.
+*
+* We consider that the date is valid.
+*
+* @param  string    $yyyymmdd    the date in yyyymmdd format
+* @return string    The date converted in yyyy-mm-dd format
+*/
+function wa_convert_date_input(string $yyyymmdd):string {
+    return substr($yyyymmdd, 0, 4).'-'.substr($yyyymmdd, 4, 2).'-'.substr($yyyymmdd, 6, 2);
+}
+
+//_______________________________________________________________
+/**
+* Convert a date from input to sql format.
+*
+* We consider that the date is valid.
+*
+* @param  string    $date    the date yyyy-mm-dd to format
+* @return string    The date converted in sql format
+*/
+function wa_convert_date_sql(string $date):string {
+    list($yyyy, $mm, $dd) = explode('-', $date);
+    return $yyyy.$mm.$dd;
+}
+
+/**
  * Fonction qui permet de determiner jusuqu'a combien de blablas va afficher la page.
  *
  * @param int $blablas nombre de blablas à afficher dans la page.
@@ -462,120 +488,6 @@ function decryptage($ciphertext){
         return $original_plaintext;
     }
     header('location: cuiteur.php');
-}
-
-/**
- *Requete donnant les tedances dans le bloc aside
- *
- */
-function get_Request_Aside_Tags()
-{
-	return 'SELECT taID,	COUNT(taID) AS taOccurence  
-	    FROM tags
-	    GROUP BY taID
-	    ORDER BY taOccurence DESC, taID DESC';
-}
-
-//___________________________________________________________________
-/**
- *Requete donnant les information de l'utilisateur d�sir� dans user
- *
- *@param		int		$usID	ID de l'utilisateur d�sir�
- */
-function get_Request_User($usID)
-{
-	return 'SELECT *
-		FROM users
-		WHERE usID='.$usID;
-}
-
-//___________________________________________________________________
-/**
- *Requete donnant le nombre de blablas post�s de l'utilisateur d�sir�
- *
- *@param		int		$usID	ID de l'utilisateur d�sir�
- */
-function get_Request_User_Count_Blablas($usID)
-{
-	return 'SELECT COUNT(blIDAuteur) AS blablas
-		FROM blablas
-		WHERE blIDAuteur=\''.($usID).'\'';
-}
-
-//___________________________________________________________________
-/**
- *Requete donnant le nombre de mentions de l'utilisateur d�sir�
- *
- *@param		int		$usID	ID de l'utilisateur d�sir�
- */
-function get_Request_User_Count_Mentions($usID)
-{
-	return 'SELECT COUNT(meIDUser) AS mentions
-		FROM mentions
-		WHERE meIDUser=\''.($usID).'\'';
-}
-
-//___________________________________________________________________
-/**
- *Requete donnant le nombre d'abonn�s de l'utilisateur d�sir�
- *
- *@param		int		$usID	ID de l'utilisateur d�sir�
- */
-function get_Request_User_Count_Abonnes($usID)
-{
-	return 'SELECT COUNT(eaIDUser) AS abonne
-		FROM estabonne
-		WHERE eaIDUser=\''.($usID).'\'';
-}
-
-//___________________________________________________________________
-/**
- *Requete donnant le nombre d'abonnements de l'utilisateur d�sir�
- *
- *@param		int		$usID	ID de l'utilisateur d�sir�
- */
-function get_Request_User_Count_Abonnements($usID)
-{
-	return 'SELECT COUNT(eaIDAbonne) AS abonnements
-		FROM estabonne
-		WHERE eaIDAbonne=\''.($usID).'\'';
-}
-
-//___________________________________________________________________
-/**
- *Requete v�rifiant si un utilisateur est abonn� a un autre
- *
- *@param		int		$usID	ID de l'utilisateur potentiellement abonn�
- *@param		int		$utID	ID de l'utilisateur auquel on est potentiellement abonn�
- */
-function get_Request_Watching_User($usID, $utID)
-{
-	return 'SELECT eaIDAbonne 
-		FROM estabonne
-		WHERE eaIDUser=\''.$utID.'\'
-		AND eaIDAbonne=\''.$usID.'\'';
-}
-
-//___________________________________________________________________
-/**
- *Requete donnant les suggestions pour le aside
- *
- *@param		int		$usID	ID de l'utilisateur d�sir�
- */
-function get_Request_Suggestions_Aside($usID)
-{
-	return "SELECT *
-			FROM users
-			WHERE usID IN (SELECT eaIDUser
-							FROM estabonne
-							WHERE eaIDAbonne IN (SELECT eaIDAbonne
-											FROM estabonne
-											WHERE eaIDUser='".$usID."'
-											)
-							)
-			AND usID!='".$usID."'
-			ORDER BY RAND()
-			LIMIT 2";
 }
 
 ?>

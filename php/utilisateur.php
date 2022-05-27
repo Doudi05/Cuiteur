@@ -16,46 +16,34 @@ if (wa_est_authentifie()){
 
 $bd = wa_bd_connect();
 
-/*------------------------------------------------------------------------------
-- Get user's data (current user if id is not set or invalid)
-------------------------------------------------------------------------------*/
-$id = isset($_GET['id']) ? $_GET['id'] : $_SESSION['usID'];
-
-if (isset($_GET['id']) && (! wa_est_entier(($_GET['id'])) || $_GET['id'] <= 0)){
-    $id = $_SESSION['usID'];
+//test si l'id est present dans l'url & s'il est valide
+if(!isset($_POST['id'])){
+	$id=decryptage(($_GET['id']));
+}else{ //si le bouton est actionner on l'abonne ou desabonne
+	$id=$_POST['id'];
+	if(isset($_POST['sabonner'])){
+		$date= date('Y').date('m').date('d');
+		$sabonner="INSERT INTO estabonne (eaIDUser , eaIDAbonne, eaDate)
+				VALUES ({$_SESSION['id']},{$_POST['id']},'$date')";
+		$sabonne=wa_bd_send_request($bd, $sabonner);
+	}else{
+		$desabonner="DELETE FROM estabonne WHERE eaIDUser = {$_SESSION['id']} AND eaIDAbonne = {$_POST['id']}";
+		$desabonne=wa_bd_send_request($bd, $desabonner);
+	}		
 }
 
-$sqlUserData = "SELECT users.*
-                FROM users
-                WHERE users.usID = $id";
+//requete pour recuperer le pseudo
+$usID=$_SESSION['id'];
+$sqlPseudo = "SELECT usPseudo FROM users WHERE usID ='$id'";
+$save=wa_bd_send_request($bd, $sqlPseudo);
+$pseudo=mysqli_fetch_assoc($save);
 
-$userData = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['bd'], $sqlUserData));
-
-$sqlStats = "SELECT COUNT(*) AS nbBlablas
-             FROM blablas
-             WHERE blablas.blIDAuteur = $id
-             UNION
-             SELECT COUNT(*) AS nbMentions
-             FROM mentions
-             WHERE mentions.meIDUser = $id";
-$stats = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['bd'], $sqlStats));
-
-
-
-// if user is not found, get current user's data
-if (!$userData){
-    $sqlUserData = "SELECT *
-               FROM users
-               WHERE usId = ". $_SESSION['usID'];
-    $userData = mysqli_fetch_assoc(wa_bd_send_request($GLOBALS['bd'], $sqlUserData));
-}
-
-$userData = wa_html_proteger_sortie($userData);
+$pseudo = wa_html_proteger_sortie($pseudo);
 
 /*------------------------------------------------------------------------------
 - Generating the html code for the page
 ------------------------------------------------------------------------------*/
-wa_aff_debut('Cuiteur | Profil de '. $userData['usPseudo'], '../styles/cuiteur.css');
+wa_aff_debut('Cuiteur | Profil de '. $pseudo['usPseudo'], '../styles/cuiteur.css');
 
 //test pour savoir si l'utilsateur existe 
 $Exist= "SELECT COUNT(usID)
@@ -68,16 +56,17 @@ $G=mysqli_fetch_assoc($test);
 if($G['COUNT(usID)']=='0'){
 	wa_aff_entete("Cette utilisateur n\'éxiste pas");
 }else{
-	wa_aff_entete("Le profil de ". $userData['usPseudo'] . "");
+	wa_aff_entete("Le profil de ". $pseudo['usPseudo'] . "");
 }
 
-wa_aff_infos(true);
+wa_aff_infos($bd, true);
 
 if($G['COUNT(usID)']!='0'){
 	wa_afficher_profil($bd, $id, "utilisateur");
 }
 
 wa_aff_pied();
+
 wa_aff_fin();
 
 // facultatif car fait automatiquement par PHP

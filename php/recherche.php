@@ -52,7 +52,8 @@ if (isset($_POST['btnValider'])) {
 wa_aff_debut('Cuiteur | Recherche', '../styles/cuiteur.css');
 
 wa_aff_entete("Recherche des utilisateurs");
-wa_aff_infos(false);
+
+wa_aff_infos($bd, true);
 
 $saisie='';
 if (isset($_POST['recherche'])) {
@@ -71,7 +72,6 @@ if(isset($_POST['recherche']) && $_POST['saisie']!=''){
 	$cou=wa_bd_send_request($bd, $count);
 	$C=mysqli_fetch_assoc($cou);
 	if ($C['count(usID)']==0) {
-		//a revoir pour le div
 		echo '<div id="blablavide">',
                 '<p>Aucun utilisateur trouver</p>',
             '</div>';
@@ -86,13 +86,14 @@ if(isset($_POST['recherche']) && $_POST['saisie']!=''){
             '<br>',
 			'<h2 id=resultRech>Résultats de la recherche</h2>',
             '<br>';
-		    MLM_GK_aff_recherche($bd,$recherche);
+		    wa_aff_recherche($bd,$recherche);
 	}
 }
 echo
 	'</div>';
 
 wa_aff_pied();
+
 wa_aff_fin();
 
 // facultatif car fait automatiquement par PHP

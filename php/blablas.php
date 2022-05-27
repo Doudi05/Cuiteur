@@ -29,7 +29,7 @@ $bd= wa_bd_connect();
 
 wa_aff_debut('Cuiteur | Blablas', '../styles/cuiteur.css');
 
-$id = mysqli_escape_string($bd,decryptage($_GET['id']));
+$id = wa_bd_proteger_entree($bd,decryptage($_GET['id']));
 
 //test pour savoir si l'utilsateur existe
 $Exist= "SELECT COUNT(usID)
@@ -81,7 +81,7 @@ if($_SESSION['id']==$id){
 	wa_aff_entete("Les blablas de {$t['usPseudo']}");
 }
 
-wa_aff_infos();
+wa_aff_infos($bd, true);
 
 if($G['COUNT(usID)']!='0'){
 	wa_afficher_profil($bd, $id, "");
@@ -93,7 +93,9 @@ $php="blablas.php";
 
 if($nombrebl==0){
 	//affichage des blablas
-	wa_aff_blablas($existbl, $nombrebl);
+	echo '<ul>';
+	wa_aff_blablas($bd, $existbl, $nombrebl);
+	echo '</ul>';
 }else{
 	//REQUETE SQL QUI PERMET DE RECUPERER TOUT LES BLABLAS DE L UTILISATEUR
 	$sql = "SELECT auteur.usID AS autID, auteur.usPseudo AS autPseudo, auteur.usNom AS autNom, auteur.usAvecPhoto AS autPhoto, blID,  blTexte, blDate, blHeure, origin.usID AS oriID, origin.usPseudo AS oriPseudo, origin.usNom As oriNom, origin.usAvecPhoto AS oriPhoto
@@ -104,14 +106,18 @@ if($nombrebl==0){
 	              ORDER BY blID DESC";
 	$sqlblablas=wa_bd_send_request($bd, $sql);
 	//affichage des blablas
-	wa_aff_blablas($sqlblablas, $nombrebl);
+	echo '<ul>';
+	wa_aff_blablas($bd, $sqlblablas, $nombrebl);
+	echo '</ul>';
 }
 
 // libération des ressources
 mysqli_free_result($res);
+
 mysqli_close($bd);
 
 wa_aff_pied();
+
 wa_aff_fin();
 
 // facultatif car fait automatiquement par PHP
