@@ -19,7 +19,7 @@ error_reporting(E_ALL); // toutes les erreurs sont capturées (utile lors de la 
 
 // si utilisateur déjà authentifié, on le redirige vers la page cuiteur_1.php
 if (wa_est_authentifie()){
-    $chemin = isset($_POST['redirection'])? $_POST['redirection'] : 'php/wesh.php';
+    $chemin = isset($_POST['redirection'])? $_POST['redirection'] : 'php/deconnexion.php';
     header('Location: '.$chemin);
     exit();
 }
@@ -34,11 +34,13 @@ $err = isset($_POST['btnConnexion']) ? wal_traitement_connexion() : array();
 wa_aff_debut('Cuiteur | Connexion', 'styles/cuiteur.css');
 
 wa_aff_entete('Connectez-vous');
+
 wa_aff_infos(false);
 
 wal_aff_formulaire($err);
 
 wa_aff_pied();
+
 wa_aff_fin();
 
 // facultatif car fait automatiquement par PHP
@@ -72,16 +74,16 @@ function wal_aff_formulaire(array $err): void {
 
 
     echo    
-            '<p>Pour vous connecter, il faut vous authentifier. </p>',
-            '<form method="post" action="index.php">',
+            '<p>Pour vous connecter, il faut vous authentifier :</p>',
+            '<form id="blockConnexion" method="post" action="index.php">',
                 '<table>';
 
-    wa_aff_ligne_input( 'Pseudo :', array('type' => 'text', 'name' => 'pseudo', 'value' => $values['pseudo'], 'required' => true));
+    wa_aff_ligne_input('Pseudo :', array('type' => 'text', 'name' => 'pseudo', 'value' => $values['pseudo'], 'required' => true));
     wa_aff_ligne_input('Mot de passe :', array('type' => 'password', 'name' => 'passe', 'value' => '', 'required' => true));
     echo '<tr><td  colspan="2"><input type="hidden" name="redirection" value="'
     ,isset($_POST["redirection"])? $_POST["redirection"] : ( isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'php/wesh.php') ,'"></td></tr>';
 
-    echo 
+    echo
                     '<tr>',
                         '<td colspan="2">',
                             '<input type="submit" name="btnConnexion" value="Connexion">',
@@ -89,7 +91,7 @@ function wal_aff_formulaire(array $err): void {
                     '</tr>',
                 '</table>',
             '</form>',
-            '<p id="texteBaspage">Pas encore de compte ? <a href="php/inscription.php">Inscrivez-vous</a> sans plus tarder!<br>Vous hésitez à vous inscrire ? Laissez-vous séduire par une <a href="html/presentation.html">présentation</a> des possibilités de Cuiteur.</p>';
+            '<p id="texteBasPageCo">Pas encore de compte ? <a href="php/inscription.php">Inscrivez-vous</a> sans plus tarder!<br>Vous hésitez à vous inscrire ? Laissez-vous séduire par une <a href="html/presentation.html">présentation</a> des possibilités de Cuiteur.</p>';
 }
 
 /**
@@ -98,7 +100,7 @@ function wal_aff_formulaire(array $err): void {
  *      Etape 1. vérification de la validité des données
  *                  -> return des erreurs si on en trouve
  *      Etape 2. enregistrement du nouvel inscrit dans la base
- *      Etape 3. ouverture de la session et redirection vers la page protegee.php 
+ *      Etape 3. ouverture de la session et redirection vers la page cuiteur.php 
  *
  * Toutes les erreurs détectées qui nécessitent une modification du code HTML sont considérées comme des tentatives de piratage 
  * et donc entraînent l'appel de la fonction wa_session_exit() sauf :
@@ -114,7 +116,7 @@ function wal_aff_formulaire(array $err): void {
 function wal_traitement_connexion(): array {
     $erreurs = array();
     
-    if( !wa_parametres_controle('post', array('pseudo', 'passe', 'btnConnexion','redirection'))) {
+    if(!wa_parametres_controle('post', array('pseudo', 'passe', 'btnConnexion','redirection'))) {
         $erreurs [] = 'Tous les champs doivent être remplis';
         echo 'blabla',$_POST['pseudo'],'';
         return $erreurs; 
@@ -174,10 +176,8 @@ function wal_traitement_connexion(): array {
 
     }else {
         $_SESSION['id'] = $t['usID'];
-        $erreurs []= 'bien connecté';
-        //header("Location: ".$_POST['redirection']);
+        //$erreurs []= 'bien connecté';
         header('Location: php/cuiteur.php');
-        //exit();
     }
     return $erreurs;
 }

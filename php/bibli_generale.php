@@ -290,7 +290,7 @@ function wa_html_proteger_sortie(array|string $content): array|string {
 *  Si on lui transmet un tableau, la fonction renvoie un tableau où toutes les chaines
 *  qu'il contient sont protégées, les autres données du tableau ne sont pas modifiées.  
 *   
-*  @param    objet          $bd         l'objet représentant la connexion au serveur MySQL
+*  @param    mysqli          $bd         l'objet représentant la connexion au serveur MySQL
 *  @param    array|string   $content    la chaine à protéger ou un tableau contenant des chaines à protéger 
 *  @return   array|string               la chaîne protégée ou le tableau
 */  
@@ -394,6 +394,32 @@ function wa_aff_ligne_input(string $libelle, array $attributs = array(), string 
 */
 
 /**
+* Convert a date from yyyymmdd to yyyy-mm-dd format to show it in a date input field.
+*
+* We consider that the date is valid.
+*
+* @param  string    $yyyymmdd    the date in yyyymmdd format
+* @return string    The date converted in yyyy-mm-dd format
+*/
+function wa_convert_date_input(string $yyyymmdd):string {
+    return substr($yyyymmdd, 0, 4).'-'.substr($yyyymmdd, 4, 2).'-'.substr($yyyymmdd, 6, 2);
+}
+
+//_______________________________________________________________
+/**
+* Convert a date from input to sql format.
+*
+* We consider that the date is valid.
+*
+* @param  string    $date    the date yyyy-mm-dd to format
+* @return string    The date converted in sql format
+*/
+function wa_convert_date_sql(string $date):string {
+    list($yyyy, $mm, $dd) = explode('-', $date);
+    return $yyyy.$mm.$dd;
+}
+
+/**
  * Fonction qui permet de determiner jusuqu'a combien de blablas va afficher la page.
  *
  * @param int $blablas nombre de blablas à afficher dans la page.
@@ -407,6 +433,61 @@ function blablaTest($blablas){
         $blablas=4;
     }
     return $blablas;
+}
+
+/**
+ * Fonction qui permet de determiner si un utilisateur a enregistrer un photo de profil , si oui il retourne son chemin d'acces.
+ *
+ * @param int    $usID    l'ID de l'utilisateur concerné.
+ * @param int    $usAvecPhoto   variable qui permet de savoir si il possede un photo dans la BD
+ * @return string   $photo   retourne le chemin d'acces a la photo de profil de l'utilisateur
+ */
+function profilePicture($usID , $usAvecPhoto){
+    if($usAvecPhoto == 1){
+        $photo='../upload/';
+        $photo.=$usID.'.jpg';
+        return $photo;
+    }
+    $photo='../images/anonyme.jpg';
+    return $photo;
+}
+
+/**
+ * Fonction qui retourne une valeur crypter pour securiter les liens
+ *
+ * @param string    $texte   la variable a crypter
+ * @return  string  $str     retour de la varuable crypter
+ */
+function cryptage($texte){
+    $plaintext = $texte;
+    $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+    $iv = openssl_random_pseudo_bytes($ivlen);
+    $key = 'toto';
+    $ciphertext_raw = openssl_encrypt($plaintext, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+    $hmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+    $ciphertext = base64_encode( $iv.$hmac.$ciphertext_raw );
+    return urlencode($ciphertext);
+}
+
+/**
+ * Fonction qui retourne une valeur decrypter pour utiliser les valeurs passer en parametres dans les liens (method $_GET)
+ *
+ * @param   string  $texte   la variable a decrypter
+ * @return  string  $str     retour de la varuable decrypter
+ */
+function decryptage($ciphertext){
+    $c = base64_decode($ciphertext);
+    $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+    $iv = substr($c, 0, $ivlen);
+    $hmac = substr($c, $ivlen, $sha2len=32);
+    $ciphertext_raw = substr($c, $ivlen+$sha2len);
+    $key = 'toto';
+    $original_plaintext = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+    $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+    if (hash_equals($hmac, $calcmac)){
+        return $original_plaintext;
+    }
+    header('location: cuiteur.php');
 }
 
 ?>
